@@ -1,0 +1,178 @@
+---
+title: "Heatmaps in R"
+author: "Kayvan Jalali & Carlos Puerta"
+date: "9/20/2023"
+output:
+  beamer_presentation:
+    keep_tex: no
+    theme: CambridgeUS
+    slide_level: 2
+    incremental: no
+fontsize: 10pt
+classoption: compress
+header-includes:
+  \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  \usepackage{amsmath,color,amsthm,amssymb,pdfpages,algorithm2e,dsfont}
+  \newcommand{\vv}{\vspace{2mm}}
+  \newcommand{\p}{\mathbb{P}}
+  \newcommand{\e}{\mathbb{E}}
+  \newcommand{\etr}{\overline{\text{err}}}
+  \newcommand{\ete}{\text{Err}_{\mathcal{T}}}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(dev = "pdf")
+
+library(nycflights13)
+library(ggplot2)
+library(pheatmap)
+library(tidyverse)
+
+x = LETTERS[1:20]
+y = paste0("var", seq(1, 20))
+data = expand.grid(X = x, Y = y)
+data$Z = runif(400, 0, 5)
+
+test = matrix(rnorm(200), 20, 10)
+test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
+test[11:20, seq(2, 10, 2)] = test[11:20, seq(2, 10, 2)] + 2
+test[15:20, seq(2, 10, 2)] = test[15:20, seq(2, 10, 2)] + 4
+colnames(test) = paste("Test", 1:10, sep = "")
+rownames(test) = paste("Gene", 1:20, sep = "")
+```
+
+\tableofcontents
+
+# What is a heatmap?
+
+A heatmap is graphic that will display your data in a colorful grid. This is great for seeing trends and patterns in your data.
+
+```{r, echo=TRUE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
+ggplot(data, aes(X, Y, fill = Z)) + 
+  geom_tile()
+```
+
+## Advantages
+ 
+## Disadvantages
+
+```{r, echo=TRUE, fig.width = 10, fig.height=5.5}
+```
+
+## When to use a heatmap
+
+# Pheatmap Package
+
+Pheatmap (Pretty Heatmaps) is a package for R that supercharges heatmaps and allows you to create incredibly complex heatmaps.
+
+## Basic functions
+
+```{r}
+pheatmap(test)
+pheatmap(test, kmeans_k = 2)
+pheatmap(test, scale = "row", clustering_distance_rows = "correlation")
+pheatmap(test, color = colorRampPalette(c("navy", "white", "firebrick3"))(50))
+pheatmap(test, cluster_row = FALSE)
+pheatmap(test, legend = FALSE)
+pheatmap(test, display_numbers = TRUE)
+pheatmap(test, display_numbers = TRUE, number_format = "%.1e")
+pheatmap(test, cluster_row = FALSE, legend_breaks = -1:4, legend_labels = c("0",
+"1e-4", "1e-3", "1e-2", "1e-1", "1"))
+pheatmap(test, cellwidth = 15, cellheight = 12, main = "Example heatmap")
+```
+
+## Dendogram
+
+## Example Pheatmap
+
+## More Complex Example
+
+### Genes
+
+\begin{figure}
+  \centering
+  \includegraphics[width=0.5\columnwidth]{figures/genes.png}
+\end{figure}
+
+# Applying Heatmaps
+
+## NYC13Flights
+
+First we get our data ready.
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+x <- flights %>%
+  filter(arr_delay > 0) %>%
+  group_by(month, carrier) %>%
+  summarize(total_delay = sum(arr_delay / 60)) %>%
+  arrange(month, carrier)
+```
+
+## NYC13Flights
+
+Then we transform it into a matrix for Pheatmap.
+```{r, echo=TRUE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
+mat <- matrix(x$total_delay, nrow = 16)
+rownames(mat) <- unique(x$carrier)
+colnames(mat) <- unique(x$month)
+```
+
+## NYC13Flights
+And finally we plot it.
+
+```{r, echo=TRUE, eval=FALSE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
+pheatmap(mat,
+  cluster_row = FALSE,
+  cluster_cols = FALSE,
+  legend_breaks = c(150, 1200, 2300),
+  legend_labels = c("Low", "Medium", "High")
+)
+```
+
+## NYC13Flights
+```{r, echo=FALSE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
+pheatmap(mat,
+  cluster_row = FALSE,
+  cluster_cols = FALSE,
+  legend_breaks = c(150, 1200, 2300),
+  legend_labels = c("Low", "Medium", "High")
+)
+```
+
+## MPG
+
+Let's do it with a simpler dataset we're familiar with. We start by getting summarizing our data.
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+x <- mpg %>%
+  group_by(year, manufacturer) %>%
+  mutate(avg_mpg = (cty + hwy) / 2) %>%
+  summarize(avg_mpg = mean(avg_mpg)) %>%
+  arrange(year, manufacturer)
+```
+We create a matrix and then plot it.
+```{r, echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE}
+mat <- matrix(x$avg_mpg, nrow = 15)
+rownames(mat) <- unique(x$manufacturer)
+colnames(mat) <- unique(x$year)
+pheatmap(mat,
+  color = colorRampPalette(
+    c("red", "orange", "yellow", "darkgreen")
+  )(1000),
+)
+```
+
+## MPG
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height=6.5}
+mat <- matrix(x$avg_mpg, nrow = 15)
+rownames(mat) <- unique(x$manufacturer)
+colnames(mat) <- unique(x$year)
+pheatmap(mat,
+  color = colorRampPalette(
+    c("red", "orange", "yellow", "darkgreen")
+  )(1000),
+)
+```
+
+# Wrapping up
