@@ -29,18 +29,24 @@ library(nycflights13)
 library(ggplot2)
 library(pheatmap)
 library(tidyverse)
+```
 
-x = LETTERS[1:20]
-y = paste0("var", seq(1, 20))
+```{r, echo=FALSE}
+
+## ggplot dummy data
+x = LETTERS[1:5]
+y = paste0("var", seq(1, 5))
 data = expand.grid(X = x, Y = y)
-data$Z = runif(400, 0, 5)
+data$Z = runif(25, 0, 5)
 
-test = matrix(rnorm(200), 20, 10)
+## Pheat dummy data
+test = matrix(rnorm(25), 20, 10)
 test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
 test[11:20, seq(2, 10, 2)] = test[11:20, seq(2, 10, 2)] + 2
 test[15:20, seq(2, 10, 2)] = test[15:20, seq(2, 10, 2)] + 4
 colnames(test) = paste("Test", 1:10, sep = "")
 rownames(test) = paste("Gene", 1:20, sep = "")
+
 ```
 
 \tableofcontents
@@ -49,23 +55,46 @@ rownames(test) = paste("Gene", 1:20, sep = "")
 
 A heatmap is graphic that will display your data in a colorful grid. This is great for seeing trends and patterns in your data.
 
-```{r, echo=TRUE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
-ggplot(data, aes(X, Y, fill = Z)) + 
-  geom_tile()
-```
+Generally, heatmaps are used to represent data where you have 2 categorical variables with a third continuous variable, though this is not explicitly necessary.
 
-## Advantages
+### Advantages
+\begin{itemize}
+  \item Adv
+  \item Adv
+\end{itemize}
  
-## Disadvantages
+### Disadvantages
+\begin{itemize}
+  \item Disadv
+  \item Disadv
+\end{itemize}
 
-```{r, echo=TRUE, fig.width = 10, fig.height=5.5}
+## Examples
+
+```{r, echo=FALSE, fig.width = 2.3, fig.height = 2.3, warning=FALSE, message=FALSE}
+ggplot(data, aes(X, Y, fill = Z)) +
+  geom_tile() + coord_equal() + theme_minimal()
+
+ggplot(mtcars, aes(x = wt, y = mpg, fill = disp)) +
+  geom_point(shape = 21) + theme_minimal()
 ```
 
 ## When to use a heatmap
 
+Eventhough heatmaps can be used with continuous variables, they can be difficult to digest. Ideally, heatmaps are used to visualize two categorical variables and a single continuous variable.
+
+## ggplot2
+
+You can create a simple and quick heatmap using the geom_tile() function in ggplot2, but these heatmaps are very limited in their functionality.
+
+```{r, echo=TRUE, fig.width = 10, fig.height=3, warning=FALSE, message=FALSE}
+ggplot(data, aes(X, Y, fill = Z)) +
+  geom_tile() + coord_equal()
+```
+
 # Pheatmap Package
 
-Pheatmap (Pretty Heatmaps) is a package for R that supercharges heatmaps and allows you to create incredibly complex heatmaps.
+Pheatmap (Pretty Heatmaps) is a package for R that supercharges heatmaps and allows you to create incredibly complex and helpful heatmaps.
 
 ## Basic functions
 
