@@ -29,6 +29,7 @@ library(nycflights13)
 library(ggplot2)
 library(pheatmap)
 library(tidyverse)
+library(RColorBrewer)
 ```
 
 ```{r, echo=FALSE}
@@ -94,86 +95,94 @@ of the value range are meaning full.
 
 You can create a simple and quick heatmap using the geom_tile() function in ggplot2, but these heatmaps are very limited in their functionality.
 
-```{r, echo=TRUE, fig.width = 10, fig.height=3, warning=FALSE, message=FALSE}
+```{r, echo=TRUE, fig.width = 4, fig.height = 2, warning=FALSE, message=FALSE}
 ggplot(data, aes(X, Y, fill = Z)) +
   geom_tile() + coord_equal()
 ```
 
 # Pheatmap Package
 
-Pheatmap (Pretty Heatmaps) is a package for R that supercharges heatmaps and allows you to create incredibly complex and helpful heatmaps.
+Pheatmap (Pretty Heatmaps) is a package for R that supercharges heatmaps and allows you to create incredibly complex and helpful heatmaps. Although it is slightly more difficult to use when compared to ggplot, it is highly specialized and focused. It can plot more than 3 variables in a single heatmap, and more importantly, it groups rows and/or columns.
 
-## Basic functions
+The grouping specifically can be incredibly helpful for visually spotting trends and similarities.
 
-```{r}
-pheatmap(test)
-pheatmap(test, kmeans_k = 2)
-pheatmap(test, scale = "row", clustering_distance_rows = "correlation")
-pheatmap(test, color = colorRampPalette(c("navy", "white", "firebrick3"))(50))
-pheatmap(test, cluster_row = FALSE)
-pheatmap(test, legend = FALSE)
-pheatmap(test, display_numbers = TRUE)
-pheatmap(test, display_numbers = TRUE, number_format = "%.1e")
-pheatmap(test, cluster_row = FALSE, legend_breaks = -1:4, legend_labels = c("0",
-"1e-4", "1e-3", "1e-2", "1e-1", "1"))
-pheatmap(test, cellwidth = 15, cellheight = 12, main = "Example heatmap")
-```
+## Dendrogram
 
-## Dendogram
+Dendrograms, create a higherarchy of similar groups. Eventhough they can be standalone, and are not always seen with heatmaps, pheatmap includes dendrograms by default. Groups that are most similar get pooled together until there are no more groupings possible. The distance between groups directly reflects the difference between groups. By default these groupings are made using the rows or columns euclidean distance.
 
-## Pheatmap example
+### A Bad Tournament
 
-```{r,include=FALSE}
+You can think of it as a tournament bracket where seeding determines your matchups, your initial matches will be the strongest teams against each other and the weakest teams against each other. The distance between the connections symbolizes the overall difference in skill.
 
-# cont. example data 
+```{r, include=FALSE}
+
+# cont. example data
 n <- 10
-x1 = matrix(1:n,nrow=n)
-x2 = matrix(1:n,nrow=1)
+x1 = matrix(1:n, nrow = n)
+x2 = matrix(1:n, nrow = 1)
 
 x3 = x1 %*% x2 # dim will be nxn
 
-#making matrix for discrete demonstration 
-filler = rep(0,25)
-fill_mat = matrix(filler,nrow=5)
-f1 = cbind(fill_mat,fill_mat+1)
-f2 = cbind(fill_mat+2,fill_mat+3)
-disc_mat = rbind(f1,f2)
-
-```
-
-```{r}
-# example why divergent palette is not good 
-pheatmap(x3,
-         cluster_rows = FALSE,
-         cluster_cols = FALSE,
-          color = colorRampPalette(c("blue", "white", "red"))(100))
+# making matrix for discrete demonstration
+filler = rep(0, 25)
+fill_mat = matrix(filler ,nrow = 5)
+f1 = cbind(fill_mat, fill_mat + 1)
+f2 = cbind(fill_mat + 2, fill_mat + 3)
+disc_mat = rbind(f1, f2)
 
 ```
 
 ## Pheatmap example
-
-```{r}
-
-# example why sequential palette is good 
+```{r, fig.width = 6, fig.height = 3}
+# example why divergent palette is not good
 pheatmap(x3,
-         cluster_rows = FALSE,
-         cluster_cols = FALSE,
-         color = colorRampPalette(c( "white", "red"))(100),
-         display_numbers = round(var(x3)) )
-
-
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  color = colorRampPalette(c("blue", "white", "red"))(100)
+)
 ```
 
 ## Pheatmap example
+```{r, fig.width = 6, fig.height = 3}
+pheatmap(x3,
+  color = colorRampPalette(c("blue", "white", "red"))(100)
+)
+```
 
-```{r}
+## Pheatmap example
+```{r, fig.width = 6, fig.height = 3}
+# example why sequential palette is good
+pheatmap(x3,
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  color = colorRampPalette(c("white", "red"))(100),
+  display_numbers = round(var(x3))
+)
+```
 
-# discrete example 
-pheatmap(disc_mat, 
-         cluster_rows = FALSE,
-         cluster_cols = FALSE,,
-         color=c('blue','red','yellow',1) )
+## Pheatmap example
+```{r, fig.width = 6, fig.height = 3}
+pheatmap(x3,
+  color = colorRampPalette(c("white", "red"))(100),
+  display_numbers = round(var(x3))
+)
+```
 
+## Pheatmap example
+```{r, fig.width = 6, fig.height = 3}
+# discrete example
+pheatmap(disc_mat,
+  cluster_rows = FALSE,
+  cluster_cols = FALSE,
+  color = c("blue", "red", "yellow", 1)
+)
+```
+
+## Pheatmap example
+```{r, fig.width = 6, fig.height = 3}
+pheatmap(disc_mat,
+  color = c("blue", "red", "yellow", 1)
+)
 ```
 
 
@@ -189,25 +198,22 @@ pheatmap(disc_mat,
 ## Code for Genes
 
 
-```{r, echo=TRUE, warning=FALSE, message=FALSE,eval=FALSE}
-topGenes = order(rowVars(Biobase::exprs(x)), 
+```{r, echo=TRUE, warning=FALSE, message=FALSE, eval=FALSE}
+topGenes = order(rowVars(Biobase::exprs(x)),
                  decreasing = TRUE)[1:500]
 rowCenter = function(x) { x - rowMeans(x) }
-
-pheatmap(rowCenter(dfx[topGenes, ]), 
-  show_rownames = FALSE, 
-  show_colnames = FALSE, 
+pheatmap(rowCenter(dfx[topGenes, ]),
+  show_rownames = FALSE,
+  show_colnames = FALSE,
   breaks = seq(-5, +5, length = 101),
-  annotation_col = pData(x)[, c("sampleGroup", 
-                                "Embryonic.day", 
-                                "ScanDate", 
-                                "genotype") ],
+  annotation_col = pData(x)[, c("sampleGroup", "Embryonic.day",
+                                "ScanDate", "genotype")],
   annotation_colors = list(
     sampleGroup = groupColor,
     genotype = c(`FGF4-KO` = "chocolate1", `WT` = "azure2"),
-    Embryonic.day = setNames(brewer.pal(9, "Blues")[c(3, 6, 9)], 
+    Embryonic.day = setNames(brewer.pal(9, "Blues")[c(3, 6, 9)],
                              c("E3.25", "E3.5", "E4.5")),
-    ScanDate = setNames(brewer.pal(nlevels(x$ScanDate), "YlGn"), 
+    ScanDate = setNames(brewer.pal(nlevels(x$ScanDate), "YlGn"),
                         levels(x$ScanDate))
   )
 )
@@ -215,81 +221,167 @@ pheatmap(rowCenter(dfx[topGenes, ]),
 
 # Applying Heatmaps
 
+## MPG
+Let's do it with a simple dataset we're familiar with.
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+mpg2 <- mpg %>%
+  group_by(manufacturer, class) %>%
+  mutate(avg_mpg = (cty + hwy) / 2) %>%
+  summarize(avg_mpg = mean(avg_mpg)) %>%
+  spread(class, avg_mpg) %>%
+  column_to_rownames("manufacturer")
+mpg2[is.na(mpg2)] = 0
+mpg2[1:5, 1:6]
+```
+
+## MPG
+```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=3}
+pheatmap(mpg2)
+```
+
+## MPG
+
+That didn't look great. Let's clean it up.
+```{r, echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE}
+pheatmap(mpg2,
+  angle_col = 45,
+  color = colorRampPalette(
+    c("gray", "red", "orange", "yellow", "darkgreen")
+  )(10),
+)
+```
+
+## MPG
+```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=3.7}
+pheatmap(mpg2,
+  angle_col = 45,
+  color = colorRampPalette(
+    c("gray", "red", "orange", "yellow", "darkgreen")
+  )(10),
+)
+```
+
 ## NYC13Flights
 
-First we get our data ready.
+We want to plot the total number of hours flights were late arrivals each month, broken up by each carrier.
 
 ```{r, echo=TRUE, warning=FALSE, message=FALSE}
-x <- flights %>%
+flights2 <- flights %>%
   filter(arr_delay > 0) %>%
   group_by(month, carrier) %>%
   summarize(total_delay = sum(arr_delay / 60)) %>%
-  arrange(month, carrier)
+  spread(carrier, total_delay) %>%
+  column_to_rownames("month")
+```
+
+## NYC13Flights
+We can now plot it.
+
+```{r, echo=TRUE, eval=TRUE, fig.width=10, fig.height=4.5, warning=FALSE, message=FALSE}
+pheatmap(flights2)
 ```
 
 ## NYC13Flights
 
-Then we transform it into a matrix for Pheatmap.
-```{r, echo=TRUE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
-mat <- matrix(x$total_delay, nrow = 16)
-rownames(mat) <- unique(x$carrier)
-colnames(mat) <- unique(x$month)
-```
+Additionally, we would like to overlay the total airtime (in days) for each month. We can do this like as well.
 
-## NYC13Flights
-And finally we plot it.
-
-```{r, echo=TRUE, eval=FALSE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
-pheatmap(mat,
-  cluster_row = FALSE,
-  cluster_cols = FALSE,
-  legend_breaks = c(150, 1200, 2300),
-  legend_labels = c("Low", "Medium", "High")
-)
-```
-
-## NYC13Flights
-```{r, echo=FALSE, fig.width = 10, fig.height=4.5, warning=FALSE, message=FALSE}
-pheatmap(mat,
-  cluster_row = FALSE,
-  cluster_cols = FALSE,
-  legend_breaks = c(150, 1200, 2300),
-  legend_labels = c("Low", "Medium", "High")
-)
-```
-
-## MPG
-
-Let's do it with a simpler dataset we're familiar with. We start by getting summarizing our data.
 ```{r, echo=TRUE, warning=FALSE, message=FALSE}
-x <- mpg %>%
-  group_by(year, manufacturer) %>%
-  mutate(avg_mpg = (cty + hwy) / 2) %>%
-  summarize(avg_mpg = mean(avg_mpg)) %>%
-  arrange(year, manufacturer)
+airtime <- flights %>%
+  filter(arr_delay > 0) %>%
+  group_by(month) %>%
+  summarize(airtime = sum(air_time / (60 * 24))) %>%
+  column_to_rownames("month")
 ```
-We create a matrix and then plot it.
-```{r, echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE}
-mat <- matrix(x$avg_mpg, nrow = 15)
-rownames(mat) <- unique(x$manufacturer)
-colnames(mat) <- unique(x$year)
-pheatmap(mat,
-  color = colorRampPalette(
-    c("red", "orange", "yellow", "darkgreen")
-  )(1000),
+
+```{r, echo=TRUE, eval=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2, annotation_row = airtime)
+```
+
+## NYC13Flights
+```{r, echo=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2, annotation_row = airtime)
+```
+
+## NYC13Flights
+
+We also know certain airlines are preferred, so we would like to see the total number of flights by airline.
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE}
+flightcounts <- flights %>%
+  group_by(carrier) %>%
+  summarize(total_flights = n()) %>%
+  column_to_rownames("carrier")
+```
+
+```{r, echo=TRUE, eval=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2, annotation_row = airtime, annotation_col = flightcounts)
+```
+
+## NYC13Flights
+```{r, eval=TRUE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2, annotation_row = airtime, annotation_col = flightcounts)
+```
+
+## NYC13Flights
+
+If we're not interested in the dendrogram, we can remove it easily.
+```{r, echo=TRUE, eval=FALSE, fig.width = 6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2,
+  annotation_row = airtime,
+  annotation_col = flightcounts,
+  cluster_row = FALSE,
+  cluster_cols = FALSE
 )
 ```
 
-## MPG
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 10, fig.height=6.5}
-mat <- matrix(x$avg_mpg, nrow = 15)
-rownames(mat) <- unique(x$manufacturer)
-colnames(mat) <- unique(x$year)
-pheatmap(mat,
-  color = colorRampPalette(
-    c("red", "orange", "yellow", "darkgreen")
-  )(1000),
+## NYC13Flights
+
+```{r, fig.width = 6, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2,
+  annotation_row = airtime,
+  annotation_col = flightcounts,
+  cluster_row = FALSE,
+  cluster_cols = FALSE
 )
 ```
+
+
+## NYC13Flights
+
+Finally, we can clean up our main legend, change the color scheme, and very clearly show missing values for our final figure.
+```{r, echo=TRUE, eval=FALSE, fig.width = 4, fig.height=4, warning=FALSE, message=FALSE}
+pheatmap(flights2,
+  annotation_row = airtime,
+  annotation_col = flightcounts,
+  cluster_row = FALSE,
+  cluster_cols = FALSE,
+  legend_breaks = c(150, 1200, 2400),
+  legend_labels = c("Low", "Medium", "High"),
+  color = RColorBrewer::brewer.pal(9, "PuRd"),
+  na_col = "black"
+)
+```
+
+## NYC13Flights
+
+```{r, fig.width = 10, fig.height=6, warning=FALSE, message=FALSE}
+pheatmap(flights2,
+  annotation_row = airtime,
+  annotation_col = flightcounts,
+  cluster_row = FALSE,
+  cluster_cols = FALSE,
+  legend_breaks = c(150, 1200, 2400),
+  legend_labels = c("Low", "Medium", "High"),
+  color = RColorBrewer::brewer.pal(9, "PuRd"),
+  na_col = "black"
+)
+```
+
+## You can also choose to go bananas
+
+\begin{figure}
+  \centering
+  \includegraphics{figures/genes.png}
+\end{figure}
 
 # Wrapping up
