@@ -59,14 +59,16 @@ Generally, heatmaps are used to represent data where you have 2 categorical vari
 
 ### Advantages
 \begin{itemize}
-  \item Adv
-  \item Adv
+  \item Adds another variable
+  \item Easier to interpret
+  \item Color is easy to parse
 \end{itemize}
  
 ### Disadvantages
 \begin{itemize}
-  \item Disadv
-  \item Disadv
+  \item Need right choice of colors and data 
+  \item Only useful if clear 
+  \item A different plot may be better
 \end{itemize}
 
 ## Examples
@@ -81,7 +83,12 @@ ggplot(mtcars, aes(x = wt, y = mpg, fill = disp)) +
 
 ## When to use a heatmap
 
-Eventhough heatmaps can be used with continuous variables, they can be difficult to digest. Ideally, heatmaps are used to visualize two categorical variables and a single continuous variable.
+Heatmaps are applicable to both continuous and discrete variables. When working with discrete variables, distinguishing between similar colors can be challenging. To improve visibility, it is recommended to use a color palette of no more than nine colors, such as ROYGBIV, black, and white.
+
+In the case of continuous variables, you have the option to use a sequential 
+color scale, transitioning from a lighter hue to a darker one or vice versa. 
+Alternatively, you can create a divergent color scale, transitioning between two distinct colors. A divergent color scale may be more useful when the center and ends
+of the value range are meaning full. 
 
 ## ggplot2
 
@@ -114,16 +121,97 @@ pheatmap(test, cellwidth = 15, cellheight = 12, main = "Example heatmap")
 
 ## Dendogram
 
-## Example Pheatmap
+## Pheatmap example
+
+```{r,include=FALSE}
+
+# cont. example data 
+n <- 10
+x1 = matrix(1:n,nrow=n)
+x2 = matrix(1:n,nrow=1)
+
+x3 = x1 %*% x2 # dim will be nxn
+
+#making matrix for discrete demonstration 
+filler = rep(0,25)
+fill_mat = matrix(filler,nrow=5)
+f1 = cbind(fill_mat,fill_mat+1)
+f2 = cbind(fill_mat+2,fill_mat+3)
+disc_mat = rbind(f1,f2)
+
+```
+
+```{r}
+# example why divergent palette is not good 
+pheatmap(x3,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+          color = colorRampPalette(c("blue", "white", "red"))(100))
+
+```
+
+## Pheatmap example
+
+```{r}
+
+# example why sequential palette is good 
+pheatmap(x3,
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         color = colorRampPalette(c( "white", "red"))(100),
+         display_numbers = round(var(x3)) )
+
+
+```
+
+## Pheatmap example
+
+```{r}
+
+# discrete example 
+pheatmap(disc_mat, 
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,,
+         color=c('blue','red','yellow',1) )
+
+```
+
 
 ## More Complex Example
 
-### Genes
+## Genes
 
 \begin{figure}
   \centering
   \includegraphics[width=0.5\columnwidth]{figures/genes.png}
 \end{figure}
+
+## Code for Genes
+
+
+```{r, echo=TRUE, warning=FALSE, message=FALSE,eval=FALSE}
+topGenes = order(rowVars(Biobase::exprs(x)), 
+                 decreasing = TRUE)[1:500]
+rowCenter = function(x) { x - rowMeans(x) }
+
+pheatmap(rowCenter(dfx[topGenes, ]), 
+  show_rownames = FALSE, 
+  show_colnames = FALSE, 
+  breaks = seq(-5, +5, length = 101),
+  annotation_col = pData(x)[, c("sampleGroup", 
+                                "Embryonic.day", 
+                                "ScanDate", 
+                                "genotype") ],
+  annotation_colors = list(
+    sampleGroup = groupColor,
+    genotype = c(`FGF4-KO` = "chocolate1", `WT` = "azure2"),
+    Embryonic.day = setNames(brewer.pal(9, "Blues")[c(3, 6, 9)], 
+                             c("E3.25", "E3.5", "E4.5")),
+    ScanDate = setNames(brewer.pal(nlevels(x$ScanDate), "YlGn"), 
+                        levels(x$ScanDate))
+  )
+)
+```
 
 # Applying Heatmaps
 
