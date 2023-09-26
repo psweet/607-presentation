@@ -137,11 +137,22 @@ pheatmap(df)
 
 ```{r}
 # Annotations 
-ann1 = data.frame( Group = sample(c('0','1') ,size=5, replace = TRUE) )
-rownames(ann1) = rownames(df)
+ann1 <- diamonds %>%
+  group_by(cut) %>%
+  summarise(avg_len =  mean(x) ) %>%
+  column_to_rownames('clarity')
+
+ann2 <- diamonds %>%
+  group_by(cut) %>%
+  summarise(avg_wid =  mean(y) ) %>%
+  column_to_rownames('cut')
+ann2
+
+
 # Annotations colors
 ann_colors = list(
-  Group = c( '0' = "blue",'1'= "yellow")
+  avg_len = c( "violet", "yellow"),
+  avg_wid = c( brewer.pal(9,'YlGn'))
   )
 
 ```
@@ -149,25 +160,28 @@ ann_colors = list(
 ## Lots of Function
 
 ```{r}
+
 pheatmap(df,
          labels_row = paste(rownames(df),1:5),
          labels_col = paste(colnames(df), 1:8 ), # overlay 
-         cluster_rows = FALSE,
-         cluster_cols = FALSE,
+         cluster_rows = TRUE,
+         cluster_cols = TRUE,
          color = colorRampPalette(c("black","blue"))(100),
          border_color = 'red',
          #color = brewer.pal(9,'Blues'),
          #clustering_distance_rows = "correlation",
-         #clustering_distance_cols = "correlation",
+         clustering_distance_cols = "correlation",
          main = "Average Price by Cut and Clarity",
-         show_rownames = FALSE,
+         show_rownames = TRUE,
          show_colnames = TRUE,
-         annotation_row = ann1,
+         annotation_col = ann1,
+         annotation_row = ann2,
          annotation_colors = ann_colors,
          legend_breaks = c(.5,.9,1.3),
-         #legend_labels = c(".5", ".9", "1.3","Average Price"),
+        # legend_labels = c(".5", ".9", "1.3","Average Price"),
          display_numbers = TRUE,
-         number_color = 'green'
+         number_color = 'green',
+        fontsize = 6
          )
 
 ```
