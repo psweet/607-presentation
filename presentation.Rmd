@@ -1,7 +1,7 @@
 ---
 title: "Heatmaps in R"
 author: "Kayvan Jalali & Carlos Puerta"
-date: "9/20/2023"
+date: "9/27/2023"
 output:
   beamer_presentation:
     keep_tex: no
@@ -114,57 +114,105 @@ Dendrograms, create a higherarchy of similar groups. Eventhough they can be stan
 
 You can think of it as a tournament bracket where seeding determines your matchups, your initial matches will be the strongest teams against each other and the weakest teams against each other. The distance between the connections symbolizes the overall difference in skill.
 
-```{r, include=FALSE}
+## Pheatmap example data creation 
+
+## Basic Functions
+```{r}
+
+df <- diamonds %>%
+  group_by(cut,clarity) %>%
+  summarise(avg_carat =  mean(carat) ) %>%
+  pivot_wider(names_from = clarity, values_from = avg_carat) %>% 
+  column_to_rownames('cut')
+
+```
+
+## Pheatmap with no Arguments 
+
+```{r}
+pheatmap(df)
+```
+
+## Make Annotations
+
+```{r}
+# Annotations 
+ann1 = data.frame( Group = sample(c('0','1') ,size=5, replace = TRUE) )
+rownames(ann1) = rownames(df)
+# Annotations colors
+ann_colors = list(
+  Group = c( '0' = "blue",'1'= "yellow")
+  )
+
+```
+
+## Lots of Function
+
+```{r}
+pheatmap(df,
+         labels_row = paste(rownames(df),1:5),
+         labels_col = paste(colnames(df), 1:8 ), # overlay 
+         cluster_rows = FALSE,
+         cluster_cols = FALSE,
+         color = colorRampPalette(c("black","blue"))(100),
+         border_color = 'red',
+         #color = brewer.pal(9,'Blues'),
+         #clustering_distance_rows = "correlation",
+         #clustering_distance_cols = "correlation",
+         main = "Average Price by Cut and Clarity",
+         show_rownames = FALSE,
+         show_colnames = TRUE,
+         annotation_row = ann1,
+         annotation_colors = ann_colors,
+         legend_breaks = c(.5,.9,1.3),
+         #legend_labels = c(".5", ".9", "1.3","Average Price"),
+         display_numbers = TRUE,
+         number_color = 'green'
+         )
+
+```
+
+```{r}
 
 # cont. example data
-n <- 10
+n <- 20
 x1 = matrix(1:n, nrow = n)
 x2 = matrix(1:n, nrow = 1)
 
-x3 = x1 %*% x2 # dim will be nxn
+mat = x1 %*% x2 # dim will be nxn
 
-# making matrix for discrete demonstration
-filler = rep(0, 25)
-fill_mat = matrix(filler ,nrow = 5)
-f1 = cbind(fill_mat, fill_mat + 1)
-f2 = cbind(fill_mat + 2, fill_mat + 3)
-disc_mat = rbind(f1, f2)
+disc_mat = matrix(sample(1:4,n^2,replace=TRUE),nrow=n)
+
+
 
 ```
 
-## Pheatmap example
+## Just Pheatmap
 ```{r, fig.width = 6, fig.height = 3}
-# example why divergent palette is not good
-pheatmap(x3,
-  cluster_rows = FALSE,
-  cluster_cols = FALSE,
-  color = colorRampPalette(c("blue", "white", "red"))(100)
-)
+pheatmap(mat)
 ```
 
-## Pheatmap example
+## Dendrogram
 ```{r, fig.width = 6, fig.height = 3}
-pheatmap(x3,
-  color = colorRampPalette(c("blue", "white", "red"))(100)
-)
+pheatmap(mat, cluster_rows = FALSE, cluster_cols = FALSE)
 ```
 
-## Pheatmap example
+## Color
 ```{r, fig.width = 6, fig.height = 3}
 # example why sequential palette is good
-pheatmap(x3,
+pheatmap(mat,
   cluster_rows = FALSE,
   cluster_cols = FALSE,
   color = colorRampPalette(c("white", "red"))(100),
-  display_numbers = round(var(x3))
+  display_numbers = round(var(mat))
 )
 ```
 
 ## Pheatmap example
 ```{r, fig.width = 6, fig.height = 3}
-pheatmap(x3,
+pheatmap(mat,
   color = colorRampPalette(c("white", "red"))(100),
-  display_numbers = round(var(x3))
+  display_numbers = round(var(mat))
 )
 ```
 
@@ -311,6 +359,8 @@ flightcounts <- flights %>%
   group_by(carrier) %>%
   summarize(total_flights = n()) %>%
   column_to_rownames("carrier")
+
+colnames(flightcounts) = "Total Flights"
 ```
 
 ```{r, echo=TRUE, eval=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
