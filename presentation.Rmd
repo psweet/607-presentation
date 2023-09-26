@@ -35,19 +35,18 @@ library(RColorBrewer)
 ```{r, echo=FALSE}
 
 ## ggplot dummy data
-x = LETTERS[1:5]
-y = paste0("var", seq(1, 5))
-data = expand.grid(X = x, Y = y)
-data$Z = runif(25, 0, 5)
+x <- LETTERS[1:5]
+y <- paste0("var", seq(1, 5))
+data <- expand.grid(X = x, Y = y)
+data$Z <- runif(25, 0, 5)
 
 ## Pheat dummy data
-test = matrix(rnorm(25), 20, 10)
-test[1:10, seq(1, 10, 2)] = test[1:10, seq(1, 10, 2)] + 3
-test[11:20, seq(2, 10, 2)] = test[11:20, seq(2, 10, 2)] + 2
-test[15:20, seq(2, 10, 2)] = test[15:20, seq(2, 10, 2)] + 4
-colnames(test) = paste("Test", 1:10, sep = "")
-rownames(test) = paste("Gene", 1:20, sep = "")
-
+test <- matrix(rnorm(25), 20, 10)
+test[1:10, seq(1, 10, 2)] <- test[1:10, seq(1, 10, 2)] + 3
+test[11:20, seq(2, 10, 2)] <- test[11:20, seq(2, 10, 2)] + 2
+test[15:20, seq(2, 10, 2)] <- test[15:20, seq(2, 10, 2)] + 4
+colnames(test) <- paste("Test", 1:10, sep = "")
+rownames(test) <- paste("Gene", 1:20, sep = "")
 ```
 
 \tableofcontents
@@ -114,92 +113,6 @@ Dendrograms, create a higherarchy of similar groups. Eventhough they can be stan
 
 You can think of it as a tournament bracket where seeding determines your matchups, your initial matches will be the strongest teams against each other and the weakest teams against each other. The distance between the connections symbolizes the overall difference in skill.
 
-## Pheatmap with no Arguments 
-
-```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
-df <- diamonds %>%
-  group_by(cut, clarity) %>%
-  summarise(avg_carat =  mean(carat)) %>%
-  pivot_wider(names_from = clarity, values_from = avg_carat) %>%
-  column_to_rownames("cut")
-
-pheatmap(df)
-```
-
-## Make Annotations
-
-```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE}
-# Annotations
-ann1 <- diamonds %>%
-  group_by(clarity) %>%
-  summarise(avg_len =  mean(x)) %>%
-  column_to_rownames("clarity")
-colnames(ann1) = "Average Length"
-
-ann2 <- diamonds %>%
-  group_by(cut) %>%
-  summarise(avg_wid =  mean(y)) %>%
-  column_to_rownames("cut")
-colnames(ann2) = "Average Width"
-
-# Annotations colors
-ann_colors <- list(
-  Average.Length = c("violet", "yellow"),
-  Average.Width = c(brewer.pal(9, "YlGn"))
-)
-
-```
-
-## Lots of Function
-
-```{r, echo=TRUE, eval=FALSE}
-pheatmap(df,
-  cluster_rows = TRUE, cluster_cols = TRUE,
-  show_rownames = TRUE, show_colnames = TRUE,
-  labels_row = paste(rownames(df), 1:5),
-  labels_col = paste(colnames(df), 1:8), # overlay
-  color = colorRampPalette(c("black", "blue"))(100),
-  border_color = "red",
-  clustering_distance_cols = "correlation",
-  main = "Average Price by Cut and Clarity",
-  annotation_col = ann1,
-  annotation_row = ann2,
-  annotation_colors = ann_colors,
-  legend_breaks = c(.5, .9, 1.3),
-  display_numbers = TRUE,
-  number_color = "green",
-  fontsize = 6,
-)
-
-```
-
-## Lots of Function
-
-```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
-pheatmap(df,
-  labels_row = paste(rownames(df), 1:5),
-  labels_col = paste(colnames(df), 1:8), # overlay
-  cluster_rows = TRUE,
-  cluster_cols = TRUE,
-  color = colorRampPalette(c("black", "blue"))(100),
-  border_color = "red",
-  clustering_distance_cols = "correlation",
-  main = "Average Price by Cut and Clarity",
-  show_rownames = TRUE,
-  show_colnames = TRUE,
-  annotation_col = ann1,
-  annotation_row = ann2,
-  annotation_colors = ann_colors,
-  legend_breaks = c(.5, .9, 1.3),
-  display_numbers = TRUE,
-  number_color = "green",
-  fontsize = 6
-  # color = brewer.pal(9,'Blues'),
-  # clustering_distance_rows = "correlation",
-  # legend_labels = c(".5", ".9", "1.3","Average Price"),
-)
-```
-
 ## Just Pheatmap
 ```{r, fig.width = 6, fig.height = 3}
 n <- 20
@@ -254,45 +167,210 @@ pheatmap(disc_mat,
 
 # Applying Heatmaps
 
-## MPG
-Let's do it with a simple dataset we're familiar with.
-```{r, echo=TRUE, warning=FALSE, message=FALSE}
-mpg2 <- mpg %>%
-  group_by(manufacturer, class) %>%
-  mutate(avg_mpg = (cty + hwy) / 2) %>%
-  summarize(avg_mpg = mean(avg_mpg)) %>%
-  spread(class, avg_mpg) %>%
-  column_to_rownames("manufacturer")
-mpg2[is.na(mpg2)] <- 0
-mpg2[1:5, 1:6]
+## Transform Diamonds Data
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE}
+df <- diamonds %>%
+  group_by(cut, clarity) %>%
+  summarise(avg_carat =  mean(carat)) %>%
+  pivot_wider(names_from = clarity, values_from = avg_carat) %>%
+  column_to_rownames("cut")
 ```
 
-## MPG
-```{r, echo=TRUE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=3}
-pheatmap(mpg2)
+## Transform Diamonds Data
+
+```{r, echo=FALSE}
+df[, 1:5]
 ```
 
-## MPG
 
-That didn't look great. Let's clean it up.
-```{r, echo=TRUE, eval=FALSE, warning=FALSE, message=FALSE}
-pheatmap(mpg2,
-  angle_col = 45,
-  color = colorRampPalette(
-    c("gray", "red", "orange", "yellow", "darkgreen")
-  )(10),
+## Normal Heatmap
+
+```{r,echo=TRUE,fig.width = 6, fig.height = 3}
+pheatmap(df)
+```
+
+## Labels
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), 
+  main = "Average Price by Cut and Clarity",
+  show_rownames = TRUE,
+  show_colnames = TRUE,
 )
 ```
 
-## MPG
-```{r, echo=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height=3.7}
-pheatmap(mpg2,
-  angle_col = 45,
-  color = colorRampPalette(
-    c("gray", "red", "orange", "yellow", "darkgreen")
-  )(10),
+## Labels
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity"
 )
 ```
+
+
+## Dendrogram
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation"
+)
+```
+
+## Dendrogram
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation"
+)
+```
+
+## Color
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_rows = "correlation",
+  color = colorRampPalette(c("white", "purple"))(100)
+  #color = brewer.pal(9,'Purples') # brewer.pal.info 
+)
+```
+
+
+## Color
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(round(df,2),
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  color = colorRampPalette(c("white", "purple"))(100)
+  #color = brewer.pal(9,'Purples') # brewer.pal.info 
+)
+```
+
+## Make Annotations
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE}
+# Annotations
+ann1 <- diamonds %>%
+  group_by(clarity) %>%
+  summarise(avg_len =  mean(x)) %>%
+  column_to_rownames("clarity")
+colnames(ann1) = "Average Length"
+
+ann2 <- diamonds %>%
+  group_by(cut) %>%
+  summarise(avg_wid =  mean(y)) %>%
+  column_to_rownames("cut")
+colnames(ann2) = "Average Width"
+
+# Annotations colors
+ann_colors <- list(
+  Average.Length = c("violet", "yellow"),
+  Average.Width = c(brewer.pal(9, "YlGn"))
+)
+
+```
+
+
+## Annotations 
+
+```{r, echo=TRUE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors
+)
+
+```
+
+## Annotations 
+
+```{r, echo=FALSE, eval=TRUE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors
+)
+
+```
+
+
+## Other
+
+```{r, echo=TRUE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors,
+  legend_breaks = c(.5, .9, 1.3),
+  display_numbers = TRUE,
+  number_color = "green",
+  fontsize = 6,
+)
+```
+
+## Other
+```{r, echo=FALSE, eval=TRUE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors,
+  legend_breaks = c(.5, .9, 1.3),
+  display_numbers = TRUE,
+  number_color = "green",
+  fontsize = 6,
+)
+```
+
+
 
 ## NYC13Flights
 
@@ -324,6 +402,7 @@ airtime <- flights %>%
   group_by(month) %>%
   summarize(airtime = sum(air_time / (60 * 24))) %>%
   column_to_rownames("month")
+colnames(airtime) <- "Airtime Hours"
 ```
 
 ```{r, echo=TRUE, eval=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
@@ -331,7 +410,7 @@ pheatmap(flights2, annotation_row = airtime)
 ```
 
 ## NYC13Flights
-```{r, echo=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+```{r, echo=FALSE, fig.width=6, fig.height=3, warning=FALSE, message=FALSE}
 pheatmap(flights2, annotation_row = airtime)
 ```
 
@@ -345,15 +424,19 @@ flightcounts <- flights %>%
   summarize(total_flights = n()) %>%
   column_to_rownames("carrier")
 
-colnames(flightcounts) = "Total Flights"
+colnames(flightcounts) <- "Total Flights"
 ```
 
 ```{r, echo=TRUE, eval=FALSE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
-pheatmap(flights2, annotation_row = airtime, annotation_col = flightcounts)
+pheatmap(
+  flights2,
+  annotation_row = airtime,
+  annotation_col = flightcounts
+)
 ```
 
 ## NYC13Flights
-```{r, eval=TRUE, fig.width=6, fig.height=4, warning=FALSE, message=FALSE}
+```{r, eval=TRUE, fig.width=6, fig.height=3, warning=FALSE, message=FALSE}
 pheatmap(flights2, annotation_row = airtime, annotation_col = flightcounts)
 ```
 
@@ -371,7 +454,7 @@ pheatmap(flights2,
 
 ## NYC13Flights
 
-```{r, fig.width = 6, fig.height=4, warning=FALSE, message=FALSE}
+```{r, fig.width = 6, fig.height=3, warning=FALSE, message=FALSE}
 pheatmap(flights2,
   annotation_row = airtime,
   annotation_col = flightcounts,
@@ -384,7 +467,7 @@ pheatmap(flights2,
 ## NYC13Flights
 
 Finally, we can clean up our main legend, change the color scheme, and very clearly show missing values for our final figure.
-```{r, echo=TRUE, eval=FALSE, fig.width = 4, fig.height=4, warning=FALSE, message=FALSE}
+```{r, echo=TRUE, eval=FALSE, fig.width = 4, fig.height = 3, warning=FALSE, message=FALSE}
 pheatmap(flights2,
   annotation_row = airtime,
   annotation_col = flightcounts,
@@ -393,7 +476,8 @@ pheatmap(flights2,
   legend_breaks = c(150, 1200, 2400),
   legend_labels = c("Low", "Medium", "High"),
   color = RColorBrewer::brewer.pal(9, "PuRd"),
-  na_col = "black"
+  na_col = "black",
+  angle_col = 315
 )
 ```
 
@@ -408,15 +492,9 @@ pheatmap(flights2,
   legend_breaks = c(150, 1200, 2400),
   legend_labels = c("Low", "Medium", "High"),
   color = RColorBrewer::brewer.pal(9, "PuRd"),
-  na_col = "black"
+  na_col = "black",
+  angle_col = 315
 )
 ```
-
-## You can also choose to go bananas
-
-\begin{figure}
-  \centering
-  \includegraphics{figures/genes.png}
-\end{figure}
 
 # Wrapping up
