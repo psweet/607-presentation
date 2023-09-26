@@ -134,16 +134,18 @@ ann1 <- diamonds %>%
   group_by(clarity) %>%
   summarise(avg_len =  mean(x)) %>%
   column_to_rownames("clarity")
+colnames(ann1) = "Average Length"
 
 ann2 <- diamonds %>%
   group_by(cut) %>%
   summarise(avg_wid =  mean(y)) %>%
   column_to_rownames("cut")
+colnames(ann2) = "Average Width"
 
 # Annotations colors
 ann_colors <- list(
-  avg_len = c("violet", "yellow"),
-  avg_wid = c(brewer.pal(9, "YlGn"))
+  Average.Length = c("violet", "yellow"),
+  Average.Width = c(brewer.pal(9, "YlGn"))
 )
 
 ```

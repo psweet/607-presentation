@@ -1,0 +1,238 @@
+---
+title: "PHM Holder"
+author: "Kayvan Jalali & Carlos Puerta"
+date: "9/27/2023"
+output:
+  beamer_presentation:
+    keep_tex: no
+    theme: CambridgeUS
+    slide_level: 2
+    incremental: no
+fontsize: 10pt
+classoption: compress
+header-includes:
+  \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
+  \usepackage{amsmath,color,amsthm,amssymb,pdfpages,algorithm2e,dsfont}
+  \newcommand{\vv}{\vspace{2mm}}
+  \newcommand{\p}{\mathbb{P}}
+  \newcommand{\e}{\mathbb{E}}
+  \newcommand{\etr}{\overline{\text{err}}}
+  \newcommand{\ete}{\text{Err}_{\mathcal{T}}}
+
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+knitr::opts_chunk$set(dev = "pdf")
+
+library(nycflights13)
+library(ggplot2)
+library(pheatmap)
+library(grid)
+library(tidyverse)
+library(RColorBrewer)
+```
+
+## Transform Diamonds Data
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE}
+df <- diamonds %>%
+  group_by(cut, clarity) %>%
+  summarise(avg_carat =  mean(carat)) %>%
+  pivot_wider(names_from = clarity, values_from = avg_carat) %>%
+  column_to_rownames("cut")
+```
+
+## Transform Diamonds Data
+
+```{r, echo=FALSE}
+df[,1:5]
+```
+
+
+
+## Normal Heatmap
+
+```{r,echo=TRUE,fig.width = 6, fig.height = 3}
+pheatmap(df)
+```
+
+## Labels
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), 
+  main = "Average Price by Cut and Clarity",
+  show_rownames = TRUE,
+  show_colnames = TRUE,
+)
+```
+
+## Labels
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity"
+)
+```
+
+
+## Dendrogram
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation"
+)
+```
+
+## Dendrogram
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation"
+)
+```
+
+## Color
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_rows = "correlation",
+  color = colorRampPalette(c("white", "purple"))(100)
+  #color = brewer.pal(9,'Purples') # brewer.pal.info 
+)
+```
+
+
+## Color
+
+```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
+pheatmap(round(df,2),
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  color = colorRampPalette(c("white", "purple"))(100)
+  #color = brewer.pal(9,'Purples') # brewer.pal.info 
+)
+```
+
+## Make Annotations
+
+```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE}
+# Annotations
+ann1 <- diamonds %>%
+  group_by(clarity) %>%
+  summarise(avg_len =  mean(x)) %>%
+  column_to_rownames("clarity")
+colnames(ann1) = "Average Length"
+
+ann2 <- diamonds %>%
+  group_by(cut) %>%
+  summarise(avg_wid =  mean(y)) %>%
+  column_to_rownames("cut")
+colnames(ann2) = "Average Width"
+
+# Annotations colors
+ann_colors <- list(
+  Average.Length = c("violet", "yellow"),
+  Average.Width = c(brewer.pal(9, "YlGn"))
+)
+
+```
+
+
+## Annotations 
+
+```{r, echo=TRUE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors
+)
+
+```
+
+## Annotations 
+
+```{r, echo=FALSE, eval=TRUE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors
+)
+
+```
+
+
+## Other
+
+```{r, echo=TRUE, eval=FALSE}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors,
+  legend_breaks = c(.5, .9, 1.3),
+  display_numbers = TRUE,
+  number_color = "green",
+  fontsize = 6,
+)
+```
+
+## Other
+```{r, echo=FALSE, eval=TRUE, fig.width = 6, fig.height = 3}
+pheatmap(df,
+  labels_row = paste(rownames(df), 1:5),
+  labels_col = paste(colnames(df), 1:8), # overlay
+  main = "Average Price by Cut and Clarity",
+  cluster_rows = FALSE,
+  cluster_cols = TRUE,
+  clustering_distance_cols = "correlation",
+  #color = colorRampPalette(c("black", "blue"))(100)
+  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  annotation_col = ann1,
+  annotation_row = ann2,
+  annotation_colors = ann_colors,
+  legend_breaks = c(.5, .9, 1.3),
+  display_numbers = TRUE,
+  number_color = "green",
+  fontsize = 6,
+)
+```
