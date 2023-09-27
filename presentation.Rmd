@@ -281,8 +281,8 @@ colnames(ann2) <- "Average Width"
 
 # Annotations colors
 ann_colors <- list(
-  Average.Length = c("violet", "yellow"),
-  Average.Width = c(brewer.pal(9, "YlGn"))
+  `Average Length` = c('white',"red"),
+  `Average Width` = c(brewer.pal(9, "Reds"))
 )
 
 ```
