@@ -10,6 +10,8 @@ output:
     incremental: no
 fontsize: 10pt
 classoption: compress
+bibliography: refs.bib
+nocite: '@*'
 header-includes:
   \hypersetup{colorlinks,citecolor=orange,filecolor=red,linkcolor=brown,urlcolor=blue}
   \usepackage{amsmath,color,amsthm,amssymb,pdfpages,algorithm2e,dsfont}
@@ -36,7 +38,7 @@ library(RColorBrewer)
 
 ## ggplot dummy data
 x <- LETTERS[1:5]
-y <- paste0("var", 1:5 )
+y <- paste0("var", 1:5)
 data <- expand.grid(X = x, Y = y)
 data$Z <- runif(25, 0, 5)
 
@@ -141,7 +143,8 @@ pheatmap(mat,
 ## Pheatmap example
 ```{r, fig.width = 6, fig.height = 3}
 pheatmap(mat,
-  color = colorRampPalette(c("white", "red"))(100))
+  color = colorRampPalette(c("white", "red"))(100)
+)
 ```
 
 ## Pheatmap example
@@ -192,7 +195,7 @@ pheatmap(df)
 ```{r, echo=TRUE, error=FALSE, warning=FALSE, message=FALSE,eval=FALSE}
 pheatmap(df,
   labels_row = paste(rownames(df), 1:5),
-  labels_col = paste(colnames(df), 1:8), 
+  labels_col = paste(colnames(df), 1:8),
   main = "Average Price by Cut and Clarity",
   show_rownames = TRUE,
   show_colnames = TRUE,
@@ -243,7 +246,6 @@ pheatmap(df,
   cluster_rows = FALSE,
   clustering_distance_rows = "correlation",
   color = colorRampPalette(c("white", "purple"))(100)
-  #color = brewer.pal(9,'Purples') # brewer.pal.info 
 )
 ```
 
@@ -251,14 +253,13 @@ pheatmap(df,
 ## Color
 
 ```{r, echo=FALSE, error=FALSE, warning=FALSE, message=FALSE, fig.width = 6, fig.height = 3}
-pheatmap(round(df,2),
+pheatmap(round(df, 2),
   labels_row = paste(rownames(df), 1:5),
   labels_col = paste(colnames(df), 1:8), # overlay
   main = "Average Price by Cut and Clarity",
   cluster_rows = FALSE,
   clustering_distance_cols = "correlation",
   color = colorRampPalette(c("white", "purple"))(100)
-  #color = brewer.pal(9,'Purples') # brewer.pal.info 
 )
 ```
 
@@ -270,13 +271,13 @@ ann1 <- diamonds %>%
   group_by(clarity) %>%
   summarise(avg_len =  mean(x)) %>%
   column_to_rownames("clarity")
-colnames(ann1) = "Average Length"
+colnames(ann1) <- "Average Length"
 
 ann2 <- diamonds %>%
   group_by(cut) %>%
   summarise(avg_wid =  mean(y)) %>%
   column_to_rownames("cut")
-colnames(ann2) = "Average Width"
+colnames(ann2) <- "Average Width"
 
 # Annotations colors
 ann_colors <- list(
@@ -296,8 +297,7 @@ pheatmap(df,
   main = "Average Price by Cut and Clarity",
   cluster_rows = FALSE,
   clustering_distance_cols = "correlation",
-  #color = colorRampPalette(c("black", "blue"))(100)
-  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  color = brewer.pal(9, "Purples"), # brewer.pal.info
   annotation_col = ann1,
   annotation_row = ann2,
   annotation_colors = ann_colors
@@ -314,8 +314,7 @@ pheatmap(df,
   main = "Average Price by Cut and Clarity",
   cluster_rows = FALSE,
   clustering_distance_cols = "correlation",
-  #color = colorRampPalette(c("black", "blue"))(100)
-  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  color = brewer.pal(9, "Purples"), # brewer.pal.info
   annotation_col = ann1,
   annotation_row = ann2,
   annotation_colors = ann_colors
@@ -334,8 +333,7 @@ pheatmap(df,
   cluster_rows = FALSE,
   cluster_cols = TRUE,
   clustering_distance_cols = "correlation",
-  #color = colorRampPalette(c("black", "blue"))(100)
-  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  color = brewer.pal(9, "Purples"), # brewer.pal.info
   annotation_col = ann1,
   annotation_row = ann2,
   annotation_colors = ann_colors,
@@ -355,8 +353,7 @@ pheatmap(df,
   cluster_rows = FALSE,
   cluster_cols = TRUE,
   clustering_distance_cols = "correlation",
-  #color = colorRampPalette(c("black", "blue"))(100)
-  color = brewer.pal(9,'Purples'), # brewer.pal.info
+  color = brewer.pal(9, "Purples"), # brewer.pal.info
   annotation_col = ann1,
   annotation_row = ann2,
   annotation_colors = ann_colors,
@@ -494,4 +491,15 @@ pheatmap(flights2,
 )
 ```
 
-# Wrapping up
+## Wrapping up
+
+\begin{itemize}
+  \item Heatmaps are applicable to both continuous and discrete variables.
+  \item When working with discrete variables, distinguishing between similar colors can be challenging.
+  \item Use no more than nine unique colors, a divergent color scale, or a sequential colorscale.
+  \item Use Pheatmap to supercharge your heatmaps
+\end{itemize}
+
+## References
+
+<div id="refs"></div>
