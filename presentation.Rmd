@@ -83,7 +83,7 @@ ggplot(mtcars, aes(x = wt, y = mpg, fill = disp)) +
   geom_point(shape = 21) + theme_minimal()
 ```
 
-## When to use a heatmap
+## Heatmap Colors
 
 Heatmaps are applicable to both continuous and discrete variables. When working with discrete variables, distinguishing between similar colors can be challenging. To improve visibility, it is recommended to use a color palette of no more than nine colors, such as ROYGBIV, black, and white.
 
