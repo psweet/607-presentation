@@ -36,7 +36,7 @@ library(RColorBrewer)
 
 ## ggplot dummy data
 x <- LETTERS[1:5]
-y <- paste0("var", seq(1, 5))
+y <- paste0("var", 1:5 )
 data <- expand.grid(X = x, Y = y)
 data$Z <- runif(25, 0, 5)
 
@@ -134,17 +134,14 @@ pheatmap(mat, cluster_rows = FALSE, cluster_cols = FALSE)
 pheatmap(mat,
   cluster_rows = FALSE,
   cluster_cols = FALSE,
-  color = colorRampPalette(c("white", "red"))(100),
-  display_numbers = round(var(mat))
+  color = colorRampPalette(c("white", "red"))(100)
 )
 ```
 
 ## Pheatmap example
 ```{r, fig.width = 6, fig.height = 3}
 pheatmap(mat,
-  color = colorRampPalette(c("white", "red"))(100),
-  display_numbers = round(var(mat))
-)
+  color = colorRampPalette(c("white", "red"))(100))
 ```
 
 ## Pheatmap example
