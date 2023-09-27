@@ -20,7 +20,6 @@ header-includes:
   \newcommand{\e}{\mathbb{E}}
   \newcommand{\etr}{\overline{\text{err}}}
   \newcommand{\ete}{\text{Err}_{\mathcal{T}}}
-
 ---
 
 ```{r setup, include=FALSE}
